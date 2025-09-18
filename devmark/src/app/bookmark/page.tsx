@@ -1,7 +1,6 @@
 import { getbookmark } from '@/app/lib/bookmarkaction/queris'
 import { addbookmark, updatebookmark, deletebookmark } from '@/app/lib/bookmarkaction/actionbookamarlk';
 import type { bookmark } from '@/app/lib/types'
-import sql from "@/app/lib/databse";
 
 export default async function Home() {
   const bookmarks = await getbookmark();
