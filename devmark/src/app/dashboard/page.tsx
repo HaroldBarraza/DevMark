@@ -2,9 +2,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function Home() {
+export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
-  // Obtener el usuario autenticado al cargar el componente
   const [display_name, setDisplayName] = useState("");
 
   useEffect(() => {
@@ -14,14 +13,11 @@ export default function Home() {
     });
   }, []);
 
+  if (!user) return <p className="text-center mt-10">No has iniciado sesión.</p>;
+
   return (
-    <main className="flex flex-col items-center justify-center p-10">
-      <h1 className="text-3xl font-bold">Bienvenido a DevMark</h1>
-      {user ? (
-        <p className="mt-4">Hola, {display_name} </p>
-      ) : (
-        <p className="mt-4">No has iniciado sesión</p>
-      )}
-    </main>
+    <div className="flex items-center justify-center min-h-screen">
+      <h1 className="text-3xl font-bold">Bienvenido, {display_name}</h1>
+    </div>
   );
 }
