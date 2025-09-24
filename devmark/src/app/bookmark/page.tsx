@@ -1,60 +1,69 @@
 import { getbookmark } from '@/app/lib/bookmarkaction/queris'
-import { addbookmark, updatebookmark, deletebookmark } from '@/app/lib/bookmarkaction/actionbookamarlk';
+import {deletebookmark } from '@/app/lib/bookmarkaction/actionbookamarlk'
 import type { bookmark } from '@/app/lib/types'
+import Link from 'next/link'
+
 
 export default async function Home() {
   const bookmarks = await getbookmark();
 
   return (
     <div className='container'>
-      <div className='form-agenda'>
-        <form action={addbookmark}>
-          <p>Add Bookmark</p>
-          <input type="text" name='title' placeholder='Title of the bookmark' required />
-          <input type="text" name='link' placeholder='URL link' required />
-          <button>Add Bookmark</button> 
-        </form>
-      </div>
-
       <div className='bookmarks'> 
         <h2>Bookmarks</h2>
+          <div className='create'>
+          <Link href={`/bookmark/create`}>Create a BookMark</Link>
+          </div>
 
         {bookmarks.length === 0 ? (
           <p>No bookmarks yet</p>
         ) : (
           <div>
-            <h3 className="categoria-titulo">All Bookmarks</h3>
-            <ul>
+            <h3>All Bookmarks</h3>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
               {bookmarks.map((bookmark: bookmark) => (
-                <li key={bookmark.id} className="bookmark-item">
-                  <div className="bookmark-contenido"> 
+                <li key={bookmark.id} style={{ 
+                  border: '1px solid #ddd', 
+                  padding: '15px', 
+                  margin: '10px 0',
+                  borderRadius: '5px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}> 
                     
-                    <div className="bookmark-info">
-                      <h4>{bookmark.title}</h4>
+                    <div>
+                      <h4 style={{ margin: '0 0 5px 0' }}>{bookmark.title}</h4>
                       <a href={bookmark.link} target="_blank" rel="noopener noreferrer">
                         {bookmark.link}
                       </a>
                     </div>
 
-                    <div className="bookmark-actions">
+                    <div style={{ display: 'flex', gap: '10px' }}>
                       <form action={async () => {
                         'use server';
                         await deletebookmark(bookmark.id);
                       }}>
-                        <button type='submit' className='boton-delete'>🗑️ Delete</button>
+                        <button type='submit' style={{ 
+                          padding: '5px 10px', 
+                          backgroundColor: '#dc3545', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '3px',
+                          cursor: 'pointer'
+                        }}>
+                          🗑️ Delete
+                        </button>
                       </form>
 
-                      <form action={async (formData: FormData) => {
-                        'use server';
-                        const title = formData.get('title') as string;
-                        const link = formData.get('link') as string;
-                        await updatebookmark(bookmark.id, title, link);
-                      }}>
-                        <input type="hidden" name="id" value={bookmark.id} />
-                        <input type = "text" name="title" defaultValue={bookmark.title} required />
-                        <input type = "url" name="link" defaultValue={bookmark.link} required />
-                        <button type="submit">✏️ Edit</button>
-                      </form>
+                      <Link 
+                        href={`/bookmark/edit/${bookmark.id}`}
+                        style={{ 
+                          padding: '5px 10px', 
+                          backgroundColor: '#ffc107', 
+                          color: 'black', 
+                          textDecoration: 'none',
+                          borderRadius: '3px',
+                          display: 'inline-block'
+                        }}>✏️ Edit</Link>
                     </div>
                   </div>
                 </li>
