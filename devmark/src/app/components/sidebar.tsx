@@ -1,5 +1,8 @@
 'use client';
 
+import React, { useState } from "react";
+import { UserMenu } from "./UserMenu";
+
 interface NavItem {
   id: string;
   icon: string;
@@ -61,6 +64,9 @@ const Navbar: React.FC<NavbarProps> = ({ isExpanded, onToggle }) => {
           </li>
         ))}
       </ul>
+      <div className="absolute bottom-0 w-full p-4">
+        <UserMenu isExpanded={isExpanded} />
+      </div>
     </nav>
   );
 };
