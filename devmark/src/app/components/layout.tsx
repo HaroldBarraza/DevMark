@@ -1,7 +1,9 @@
+// app/components/layout.tsx
 'use client';
 
 import { useState } from 'react';
 import Navbar from '@/app/components/sidebar';
+import { useUser } from '@/app/context/UserContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,6 +11,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isNavbarExpanded, setIsNavbarExpanded] = useState(false);
+  const { userId } = useUser();
 
   const handleToggleNavbar = () => {
     setIsNavbarExpanded(!isNavbarExpanded);
@@ -16,13 +19,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar isExpanded={isNavbarExpanded} onToggle={handleToggleNavbar} />
-      
-      <main className={`
-        min-h-screen transition-all duration-300 ease-in-out
-        ${isNavbarExpanded ? 'ml-64' : 'ml-16'}
-        p-6
-      `}>
+      <Navbar
+        isExpanded={isNavbarExpanded}
+        onToggle={handleToggleNavbar}
+      />
+      <main
+        className={`
+          min-h-screen transition-all duration-300 ease-in-out
+          ${isNavbarExpanded ? 'ml-64' : 'ml-16'}
+          p-6
+        `}
+      >
         {children}
       </main>
     </div>

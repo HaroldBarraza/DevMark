@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from "react";
-import { UserMenu } from "./UserMenu";
+import React from 'react';
+import Link from 'next/link';
+import { UserMenu } from './UserMenu';
 
 interface NavItem {
   id: string;
   icon: string;
   text: string;
+  url: string;
 }
 
 interface NavbarProps {
@@ -16,11 +18,11 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ isExpanded, onToggle }) => {
   const navItems: NavItem[] = [
-    { id: 'all', icon: '📁', text: 'Todos los marcadores' },
-    { id: 'unclassified', icon: '🏷️', text: 'Sin clasificar' },
-    { id: 'filters', icon: '🔍', text: 'Filtros' },
-    { id: 'videos', icon: '📹', text: 'Videos' },
-    { id: 'untagged', icon: '📌', text: 'Sin etiquetas' },
+    { id: 'all', icon: '📁', text: 'Todos los marcadores', url: '/bookmark' },
+    { id: 'unclassified', icon: '🏷️', text: 'Sin clasificar', url: '/unclassified' },
+    { id: 'filters', icon: '🔍', text: 'Filtros', url: '/filters' },
+    { id: 'videos', icon: '📹', text: 'Videos', url: '/videos' },
+    { id: 'untagged', icon: '📌', text: 'Sin etiquetas', url: '/untagged' },
   ];
 
   return (
@@ -37,10 +39,9 @@ const Navbar: React.FC<NavbarProps> = ({ isExpanded, onToggle }) => {
         >
           ☰
         </button>
-        <span className={`
-          ml-4 font-semibold whitespace-nowrap transition-opacity duration-200
-          ${isExpanded ? 'opacity-100' : 'opacity-0'}
-        `}>
+        <span className={`ml-4 font-semibold whitespace-nowrap transition-opacity duration-200
+          ${isExpanded ? 'opacity-100' : 'opacity-0'}`}
+        >
           Todos los marcadores
         </span>
       </div>
@@ -49,21 +50,19 @@ const Navbar: React.FC<NavbarProps> = ({ isExpanded, onToggle }) => {
       <ul className="py-2">
         {navItems.map((item) => (
           <li key={item.id}>
-            <button className="
-              w-full flex items-center p-3 hover:bg-gray-700 transition-colors duration-200
-              text-left whitespace-nowrap
-            ">
-              <span className="text-lg min-w-[20px] mr-4">{item.icon}</span>
-              <span className={`
-                transition-opacity duration-200
-                ${isExpanded ? 'opacity-100' : 'opacity-0'}
-              `}>
-                {item.text}
-              </span>
-            </button>
+            <Link href={item.url}>
+              <button className="w-full flex items-center p-3 hover:bg-gray-700 transition-colors duration-200 text-left whitespace-nowrap">
+                <span className="text-lg min-w-[20px] mr-4">{item.icon}</span>
+                <span className={`transition-opacity duration-200 ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>
+                  {item.text}
+                </span>
+              </button>
+            </Link>
           </li>
         ))}
       </ul>
+
+      {/* User Menu */}
       <div className="absolute bottom-0 w-full p-4">
         <UserMenu isExpanded={isExpanded} />
       </div>

@@ -15,9 +15,8 @@ export default function Home() {
       if (!session) {
         router.push("/auth/login");
       } else {
-        // Intentamos mostrar el nombre real si existe en el profile
         const { data: profileData, error } = await supabase
-          .from("profiles") // si tenés tabla profiles con info del usuario
+          .from("profiles") 
           .select("full_name")
           .eq("id", session.user.id)
           .single();

@@ -1,26 +1,35 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/app/context/UserContext";
 import { supabase } from "@/app/lib/supabaseClient";
 
 interface UserMenuProps {
   isExpanded: boolean;
+  // userId ya no hace falta
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ isExpanded }) => {
+  const { userId } = useUser(); // 🔹 Tomamos el userId del contexto
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [userName, setUserName] = useState("Usuario");
+  const [userEmail, setUserEmail] = useState("Usuario");
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      const email = data.session?.user.email;
-      if (email) setUserName(email);
+    const fetchUserEmail = async () => {
+      if (userId) {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("id", userId)
+          .single();
+
+        if (data?.email) setUserEmail(data.email);
+      }
     };
-    fetchUser();
-  }, []);
+    fetchUserEmail();
+  }, [userId]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -41,7 +50,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ isExpanded }) => {
         }`}
       >
         <span className="text-lg">👤</span>
-        {isExpanded && <span className="ml-2">{userName}</span>}
+        {isExpanded && <span className="ml-2">{userEmail}</span>}
       </button>
 
       {/* Menú desplegable */}

@@ -1,14 +1,13 @@
-import type { Metadata } from 'next';
+// app/layout.tsx
+'use client'; 
+
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Layout from '@/app/components/layout';
+import { ClientUserProvider } from '@/app/components/ClientUserProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'Marcadores App',
-  description: 'Gestiona tus marcadores favoritos',
-};
 
 export default function RootLayout({
   children,
@@ -18,9 +17,10 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <Layout>
-          {children}
-        </Layout>
+
+        <ClientUserProvider>
+          <Layout>{children}</Layout>
+        </ClientUserProvider>
       </body>
     </html>
   );

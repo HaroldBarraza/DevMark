@@ -1,14 +1,14 @@
 // src/app/bookmark/edit/[id]/page.tsx
-import { getbookmarkById } from '@/app/lib/bookmarkaction/queris'
-import { updatebookmark } from '@/app/lib/bookmarkaction/actionbookamarlk'
+import { getBookmarkById } from '@/app/lib/bookmarkaction/queris'
+import { updateBookmark } from '@/app/lib/bookmarkaction/actionbookamarlk'
 import { notFound, redirect } from 'next/navigation'
 
 export default async function EditPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = parseInt(params.id);
-  
-  const bookmark = await getbookmarkById(id);
-  
+
+  const bookmark = await getBookmarkById(id);
+
   if (!bookmark) {
     notFound();
   }
@@ -33,7 +33,7 @@ export default async function EditPage(props: { params: Promise<{ id: string }> 
         'use server'
         const title = formData.get('title') as string;
         const link = formData.get('link') as string;
-        await updatebookmark(id, title, link);
+        await updateBookmark(id, title, link);
         redirect('/bookmark');
       }}>
         <div style={{ marginBottom: '15px' }}>

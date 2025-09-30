@@ -50,12 +50,14 @@ export default function RegisterPage() {
       name: displayName,
       role: "USER",
       provider: "LOCAL",
-      emailverified: false,
-      bookmarks: JSON.stringify([]),
-      collections: JSON.stringify([]),
-      createdat: new Date().toISOString(),
-      updatedat: new Date().toISOString(),
+      providerId: null,
+      emailVerified: false,
+      image: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      deletedAt: null,
     });
+
 
     setLoading(false);
 
