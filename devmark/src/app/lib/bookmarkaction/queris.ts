@@ -4,9 +4,9 @@ import type {bookmark} from "@/app/lib/types"
 //get notes
 export async function getbookmark(): Promise<bookmark[]> {
     const res = await sql `
-    SELECT bookmark.id, bookmark.title, bookmark.link
-    FROM bookmark
-    ORDER BY bookmark.id DESC`;
+    SELECT bookmarks.id, bookmarks.title, bookmarks.link, bookmarks.description, bookmarks.image
+    FROM bookmarks
+    ORDER BY bookmarks.id DESC`;
     return res as unknown as bookmark[]
 }
 
@@ -14,9 +14,9 @@ export async function getbookmark(): Promise<bookmark[]> {
 export async function getbookmarkById(id: number): Promise<bookmark | null> {
     try {
         const res = await sql `
-        SELECT bookmark.id, bookmark.title, bookmark.link, bookmark.user_id
-        FROM bookmark
-        WHERE bookmark.id = ${id}`;
+        SELECT bookmarks.id, bookmarks.title, bookmarks.link, bookmarks.user_id, bookmarks.description, bookmarks.image
+        FROM bookmarks
+        WHERE bookmarks.id = ${id}`;
         
         if (res.length === 0) {
             return null;

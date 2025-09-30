@@ -3,6 +3,8 @@ export type bookmark = {
     id: number;
     title: string;
     link: string;
+    image: string;
+    description: string;
     user_id:string 
 }
 

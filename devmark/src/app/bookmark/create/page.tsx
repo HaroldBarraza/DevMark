@@ -14,7 +14,6 @@ export default function CreateBookmark() {
             <div className='create'>
                 <form action={createBookmarkAction}>
                     <p>Add BookMark</p>
-                    <input type="text" name='title' placeholder='Input the title' required/>
                     <input type="url" name='link' placeholder='https://example.com' required />
                     <button type="submit">Add Bookmark</button>
                 </form>
