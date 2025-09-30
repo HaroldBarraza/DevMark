@@ -6,28 +6,44 @@ import { revalidatePath } from 'next/cache'
 
 // extraer oinformacion de la pagina
 
-async function scrapWebData(url:string) {
-    try{
-        const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/scrape`,
-            {
+function getBaseUrl() {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  return 'http://localhost:3000';
+}
+
+// extraer informacion de la pagina
+async function scrapWebData(url: string) {
+    try {
+        // ✅ URL absoluta usando la función automática
+        const baseUrl = getBaseUrl();
+        const apiUrl = `${baseUrl}/api/scrape`;
+        
+        console.log('📡 Llamando a API:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
-                'Content-Type':'application/json',
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({url}),
-            
+            body: JSON.stringify({ url }),
         })
-        if(!response.ok){
+        
+        if (!response.ok) {
             throw new Error('Error al extraer informacion de la URL')
         }
+        
         const data = await response.json()
         return data.data 
-    }catch(error){
+        
+    } catch (error) {
         console.error('error con la URL:', error)
-        return{
-            title: ' titulo o no encontrado',
-            description : '',
-            image :'/default-icon.png'
+        return {
+            title: 'Título no disponible',
+            description: '',
+            image: '/default-icon.png'
         } 
     }
 }
