@@ -5,7 +5,7 @@ export type bookmark = {
     link: string;
     image: string;
     description: string;
-    user_id:string 
+    user_id:string;
 }
 
 export type tags = {

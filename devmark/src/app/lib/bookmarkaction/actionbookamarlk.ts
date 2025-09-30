@@ -56,8 +56,8 @@ export async function addbookmark(formData: FormData) {
     }
 }
 
-export async function updatebookmark(id:number, title:string, link:string) {
-    await sql `UPDATE bookmarks set title = ${title}, link = ${link} where id = ${id}`;
+export async function updatebookmark(id:number, title:string, link:string, description:string) {
+    await sql `UPDATE bookmarks set title = ${title}, link = ${link}, description = ${description} where id = ${id}`;
 
     revalidatePath('/');
 }

@@ -1,4 +1,3 @@
-// src/app/bookmark/edit/[id]/page.tsx
 import { getbookmarkById } from '@/app/lib/bookmarkaction/queris'
 import { updatebookmark } from '@/app/lib/bookmarkaction/actionbookamarlk'
 import { notFound, redirect } from 'next/navigation'
@@ -14,90 +13,56 @@ export default async function EditPage(props: { params: Promise<{ id: string }> 
   }
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-      <h1>Edit Bookmark</h1>
-      <p>Editing bookmark ID: {id}</p>
-      
-      <div style={{ 
-        backgroundColor: '#000000ff', 
-        padding: '15px', 
-        marginBottom: '20px',
-        borderRadius: '5px'
-      }}>
-        <h3>Current Bookmark</h3>
-        <p><strong>Title:</strong> {bookmark.title}</p>
-        <p><strong>URL:</strong> {bookmark.link}</p>
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-200">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Bookmark</h1>
+        <p className="text-gray-600">Update your bookmark information</p>
       </div>
-
+  
       <form action={async (formData: FormData) => {
         'use server'
         const title = formData.get('title') as string;
         const link = formData.get('link') as string;
-        await updatebookmark(id, title, link);
+        const description = formData.get('description') as string;
+        await updatebookmark(id, title, link, description);
         redirect('/bookmark');
       }}>
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="title" style={{ display: 'block', marginBottom: '5px' }}>
-            Title:
-          </label>
-          <input 
-            type="text" 
-            id="title"
-            name="title" 
-            defaultValue={bookmark.title} 
-            required 
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: '1px solid #ccc',
-              borderRadius: '4px'
-            }}
-          />
-        </div>
-        
-        <div style={{ marginBottom: '20px' }}>
-          <label htmlFor="link" style={{ display: 'block', marginBottom: '5px' }}>
-            URL:
-          </label>
-          <input 
-            type="url" 
-            id="link"
-            name="link" 
-            defaultValue={bookmark.link} 
-            required 
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: '1px solid #ccc',
-              borderRadius: '4px'
-            }}
-          />
-        </div>
+    
+    {/* Campo Title */}
+      <div className="mb-6">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          Title *
+        </label>
+        <input type="text" id="title"name="title" defaultValue={bookmark.title} required placeholder="Enter bookmark title"className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"/>
+      </div>
+    
+    {/* Campo URL */}
+      <div className="mb-6">
+        <label htmlFor="link" className="block text-sm font-medium text-gray-700 mb-2">
+        URL *
+        </label>
+        <input type="url" id="link"name="link" defaultValue={bookmark.link} required placeholder="https://example.com"className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"/>
+      </div>
 
-        
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            type="submit"
-            style={{ 
-              padding: '10px 20px', 
-              backgroundColor: '#28a745', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>💾 Save Changes</button>
-          
-          <a 
-            href="/bookmark"
-            style={{ 
-              padding: '10px 20px', 
-              backgroundColor: '#6c757d', 
-              color: 'white', 
-              textDecoration: 'none',
-              borderRadius: '4px'
-            }}>❌ Cancel</a>
-        </div>
-      </form>
-    </div>
+    {/* Campo Description */}
+      <div className="mb-8">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+          Description
+        </label>
+        <textarea id="description"name="description" defaultValue={bookmark.description} rows={4}placeholder="Optional description for your bookmark"className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"/>
+      </div>
+
+    {/* Botones */}
+      <div className="flex gap-3 pt-4 border-t border-gray-200">
+        <button type="submit" className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 shadow-sm">
+          💾 Save Changes
+        </button>
+
+        <a href="/bookmark"className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium flex items-center gap-2">
+          ❌ Cancel
+        </a>
+      </div>
+    </form>
+  </div>
   )
 }

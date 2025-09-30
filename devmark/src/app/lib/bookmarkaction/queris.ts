@@ -1,7 +1,7 @@
 import sql from "@/app/lib/databse"
 import type {bookmark} from "@/app/lib/types"
 
-//get notes
+//get bookmarks
 export async function getbookmark(): Promise<bookmark[]> {
     const res = await sql `
     SELECT bookmarks.id, bookmarks.title, bookmarks.link, bookmarks.description, bookmarks.image
