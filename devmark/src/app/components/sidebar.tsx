@@ -19,6 +19,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ isExpanded, onToggle }) => {
   const navItems: NavItem[] = [
     { id: 'all', icon: '📁', text: 'Todos los marcadores', url: '/bookmark' },
+    { id: 'collections', icon: '🗂️', text: 'Colecciones', url: '/collections' },
     { id: 'unclassified', icon: '🏷️', text: 'Sin clasificar', url: '/unclassified' },
     { id: 'filters', icon: '🔍', text: 'Filtros', url: '/filters' },
     { id: 'videos', icon: '📹', text: 'Videos', url: '/videos' },
