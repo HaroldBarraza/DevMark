@@ -65,7 +65,12 @@ export default function CollectionsPage() {
               className="flex justify-between items-center border p-4 rounded-lg shadow-sm hover:shadow-md transition"
             >
               <span>{col.name}</span>
+
               <div className="space-x-2">
+
+                <button onClick={() => router.push(`/collections/${col.id}/bookmarks`)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md">
+                  Bookmarks
+                </button>
                 <button
                   onClick={() => router.push(`/collections/${col.id}/edit`)}
                   className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md"

@@ -67,3 +67,18 @@ export async function getBookmarkByIdForUser(id: number, userId: string): Promis
     if (res.length === 0) return null;
     return res[0] as unknown as Bookmark;
 }
+
+
+// QUERIE PARA BOOKMARKS CON COLECCIONES
+
+export async function getBookmarkWithCollections(id: number) {
+    const res = await sql`
+        SELECT b.*, json_agg(c.*) as collections
+        FROM "bookmarks" b
+        LEFT JOIN "collection_bookmarks" cb ON cb.bookmark_id = b.id
+        LEFT JOIN "collections" c ON c.id = cb.collection_id
+        WHERE b.id = ${id}
+        GROUP BY b.id;
+    `;
+    return res[0] as unknown as Bookmark & { collections: { id: string; name: string }[] };
+}
