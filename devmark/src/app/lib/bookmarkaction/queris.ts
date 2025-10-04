@@ -17,9 +17,9 @@ export async function getBookmarks(): Promise<Bookmark[]> {
 export async function getBookmarkById(id: number): Promise<Bookmark | null> {
     try {
         const res = await sql`
-            SELECT "id", "title", "link", "userId",
-                   "createdAt",
-                   "updatedAt",
+            SELECT "id", "title", "link", "user_id" AS "userId",
+                   "created_at",
+                   "updated_at",
                    "description", "image"
             FROM "bookmarks"
             WHERE "id" = ${id};
@@ -68,6 +68,43 @@ export async function getBookmarkByIdForUser(id: number, userId: string): Promis
     return res[0] as unknown as Bookmark;
 }
 
+// Get bookmarks for a specific user WITH tags
+export async function getBookmarksByUserWithTags(userId: string): Promise<Bookmark[]> {
+  const res = await sql`
+    SELECT b.id, b.title, b.link, b.user_id AS "userId",
+           b.created_at AS "createdAt",
+           b.updated_at AS "updatedAt",
+           b.description, b.image,
+           COALESCE(json_agg(json_build_object('id', t.id, 'name', t.name)) 
+                    FILTER (WHERE t.id IS NOT NULL), '[]') AS tags
+    FROM bookmarks b
+    LEFT JOIN bookmark_tags bt ON bt.bookmark_id = b.id
+    LEFT JOIN tags t ON t.id = bt.tag_id
+    WHERE b.user_id = ${userId}
+    GROUP BY b.id
+    ORDER BY b.id DESC;
+  `;
+  return res as unknown as Bookmark[];
+}
+
+export async function getBookmarksByTag(tagId: string, userId: string): Promise<Bookmark[]> {
+  const res = await sql`
+    SELECT b.id, b.title, b.link, b.user_id AS "userId",
+           b.created_at AS "createdAt",
+           b.updated_at AS "updatedAt",
+           b.description, b.image,
+           COALESCE(json_agg(json_build_object('id', t.id, 'name', t.name)) 
+                    FILTER (WHERE t.id IS NOT NULL), '[]') AS tags
+    FROM bookmarks b
+    INNER JOIN bookmark_tags bt ON bt.bookmark_id = b.id
+    LEFT JOIN tags t ON t.id = bt.tag_id
+    WHERE b.user_id = ${userId}
+      AND bt.tag_id = ${tagId}
+    GROUP BY b.id
+    ORDER BY b.id DESC;
+  `;
+  return res as unknown as Bookmark[];
+}
 
 // QUERIE PARA BOOKMARKS CON COLECCIONES
 

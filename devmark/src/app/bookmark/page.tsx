@@ -12,8 +12,7 @@ export default function Home() {
   useEffect(() => {
     if (!userId) return;
 
-    // Consumimos la API route del servidor
-    fetch(`/api/bookmarks/${userId}`)
+    fetch(`/api/bookmarks?userId=${userId}`)
       .then(res => res.json())
       .then((data: Bookmark[]) => {
         setBookmarks(data);
@@ -29,55 +28,85 @@ export default function Home() {
 
   return (
     <div className='container'>
-      <div className='bookmarks'> 
+      <div className='bookmarks'>
         <h2>Bookmarks</h2>
         <div className='create'>
-          <Link href={`/bookmark/create`}>Create a BookMark</Link>
+          <Link href={`/bookmark/create`}>Create a Bookmark</Link>
         </div>
 
         {bookmarks.length === 0 ? (
           <p>No bookmarks yet</p>
         ) : (
           <ul style={{ listStyle: 'none', padding: 0 }}>
-            {bookmarks.map((bookmark) => (
-              <li key={bookmark.id} style={{ 
-                border: '1px solid #ddd', 
-                padding: '15px', 
-                margin: '10px 0',
-                borderRadius: '5px'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}> 
+            {bookmarks.map(bookmark => (
+              <li
+                key={bookmark.id}
+                style={{
+                  border: '1px solid #ddd',
+                  padding: '15px',
+                  margin: '10px 0',
+                  borderRadius: '5px'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <h4 style={{ margin: '0 0 5px 0' }}>{bookmark.title}</h4>
                     <a href={bookmark.link} target="_blank" rel="noopener noreferrer">
                       {bookmark.link}
                     </a>
+                    <p style={{ margin: '5px 0 0 0', color: '#555' }}>{bookmark.description}</p>
+
+                    {/* Mini tarjetitas de tags */}
+                    {bookmark.tags && bookmark.tags.length > 0 && (
+                      <div style={{ marginTop: '8px', display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                        {bookmark.tags.map(tag => (
+                          <span
+                            key={tag.id}
+                            style={{
+                              backgroundColor: '#e0e0e0',
+                              padding: '2px 6px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              color: '#333'
+                            }}
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', gap: '10px' }}>
                     <form action={`/api/bookmarks/delete/${bookmark.id}`} method="POST">
-                      <button type='submit' style={{ 
-                        padding: '5px 10px', 
-                        backgroundColor: '#dc3545', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: '3px',
-                        cursor: 'pointer'
-                      }}>
+                      <button
+                        type='submit'
+                        style={{
+                          padding: '5px 10px',
+                          backgroundColor: '#dc3545',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '3px',
+                          cursor: 'pointer'
+                        }}
+                      >
                         🗑️ Delete
                       </button>
                     </form>
 
-                    <Link 
+                    <Link
                       href={`/bookmark/edit/${bookmark.id}`}
-                      style={{ 
-                        padding: '5px 10px', 
-                        backgroundColor: '#ffc107', 
-                        color: 'black', 
+                      style={{
+                        padding: '5px 10px',
+                        backgroundColor: '#ffc107',
+                        color: 'black',
                         textDecoration: 'none',
                         borderRadius: '3px',
                         display: 'inline-block'
-                      }}>✏️ Edit</Link>
+                      }}
+                    >
+                      ✏️ Edit
+                    </Link>
                   </div>
                 </div>
               </li>

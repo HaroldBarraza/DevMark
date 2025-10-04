@@ -2,7 +2,7 @@
 //  BOOKMARK
 // ==================================
 export type Bookmark = {
-  id: number;       // PK
+  id: string;       // PK
   title: string;
   link: string;
   userId: string;   // FK → Profile.id
