@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { Bookmark } from '@/app/lib/types';
 import { useUser } from '@/app/context/UserContext';
-import { deleteBookmark } from '@/app/lib/bookmarkaction/actionbookamarlk';
 import Link from 'next/link';
 
 export default function BookmarksPage() {
@@ -10,6 +9,7 @@ export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Función para extraer dominio de la URL
   function extractDomain(url: string) {
     try {
       const domain = new URL(url).hostname;
@@ -19,6 +19,7 @@ export default function BookmarksPage() {
     }
   }
 
+  // Fetch bookmarks
   useEffect(() => {
     if (!userId) return;
 
@@ -33,6 +34,25 @@ export default function BookmarksPage() {
         setLoading(false);
       });
   }, [userId]);
+
+  // Función para borrar bookmark usando fetch a un endpoint API
+  const handleDelete = async (id: number) => {
+    if (!userId) return;
+
+    const confirmed = confirm('¿Seguro que quieres borrar este bookmark?');
+    if (!confirmed) return;
+
+    try {
+      await fetch('/api/bookmarks/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, userId }),
+      });
+      setBookmarks(bookmarks.filter(b => b.id !== id));
+    } catch (err) {
+      console.error('Error deleting bookmark:', err);
+    }
+  };
 
   if (!userId || loading) return <p className="text-center py-8">Cargando...</p>;
 
@@ -127,19 +147,12 @@ export default function BookmarksPage() {
                       ✏️
                     </Link>
 
-                    <form
-                      action={async () => {
-                        'use server';
-                        await deleteBookmark(bookmark.id, userId);
-                      }}
+                    <button
+                      onClick={() => handleDelete(bookmark.id)}
+                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
                     >
-                      <button
-                        type="submit"
-                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
-                      >
-                        🗑️
-                      </button>
-                    </form>
+                      🗑️
+                    </button>
                   </div>
                 </div>
               </div>
