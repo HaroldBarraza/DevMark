@@ -12,22 +12,31 @@ type Bookmark = {
   tags?: Tag[];
 };
 
-export default function EditBookmark({ params }: { params: { id: string } }) {
+export default function EditBookmark({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { userId } = useUser();
-  const id = params.id;
   const router = useRouter();
 
   const [bookmark, setBookmark] = useState<Bookmark | null>(null);
   const [loading, setLoading] = useState(true);
   const [tagsInput, setTagsInput] = useState('');
+  const [resolvedId, setResolvedId] = useState<string | null>(null);
+
+  // Resolver params.id
+  useEffect(() => {
+    params.then(({ id }) => setResolvedId(id));
+  }, [params]);
 
   // Fetch bookmark data
   useEffect(() => {
-    if (!userId || !id) return;
+    if (!userId || !resolvedId) return;
 
     const fetchBookmark = async () => {
       try {
-        const res = await fetch(`/api/bookmarks/${id}?userId=${userId}`);
+        const res = await fetch(`/api/bookmarks/${resolvedId}?userId=${userId}`);
         const data = await res.json();
         if (!res.ok) {
           console.error('API error:', data);
@@ -43,7 +52,7 @@ export default function EditBookmark({ params }: { params: { id: string } }) {
     };
 
     fetchBookmark();
-  }, [id, userId]);
+  }, [resolvedId, userId]);
 
   if (loading) return <p className="text-center text-gray-600 mt-8">Cargando...</p>;
   if (!bookmark) return <p className="text-center text-red-500 mt-8">Bookmark no encontrado</p>;
@@ -51,7 +60,7 @@ export default function EditBookmark({ params }: { params: { id: string } }) {
   // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!userId) return;
+    if (!userId || !resolvedId) return;
 
     const formData = new FormData(e.currentTarget);
     const title = formData.get('title') as string;
@@ -64,7 +73,7 @@ export default function EditBookmark({ params }: { params: { id: string } }) {
       .filter(Boolean);
 
     try {
-      const res = await fetch(`/api/bookmarks/${id}?userId=${userId}`, {
+      const res = await fetch(`/api/bookmarks/${resolvedId}?userId=${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, link, description, tags }),

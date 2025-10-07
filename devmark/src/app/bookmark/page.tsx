@@ -1,5 +1,7 @@
 'use client';
+
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Bookmark } from '@/app/lib/types';
 import { useUser } from '@/app/context/UserContext';
 import Link from 'next/link';
@@ -9,7 +11,6 @@ export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Función para extraer dominio de la URL
   function extractDomain(url: string) {
     try {
       const domain = new URL(url).hostname;
@@ -19,7 +20,6 @@ export default function BookmarksPage() {
     }
   }
 
-  // Fetch bookmarks
   useEffect(() => {
     if (!userId) return;
 
@@ -35,12 +35,10 @@ export default function BookmarksPage() {
       });
   }, [userId]);
 
-  // Función para borrar bookmark usando fetch a un endpoint API
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!userId) return;
 
-    const confirmed = confirm('¿Seguro que quieres borrar este bookmark?');
-    if (!confirmed) return;
+    if (!confirm('¿Seguro que quieres borrar este bookmark?')) return;
 
     try {
       await fetch('/api/bookmarks/delete', {
@@ -74,20 +72,20 @@ export default function BookmarksPage() {
           <p className="text-gray-500 text-center py-8">No bookmarks yet</p>
         ) : (
           <div className="space-y-4">
-            {bookmarks.map((bookmark: Bookmark) => (
+            {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
                 className="border border-gray-200 rounded-xl p-5 bg-white hover:shadow-md transition-all duration-200"
               >
                 <div className="flex justify-between items-start">
-                  {/* Contenido principal */}
                   <div className="flex gap-4 items-start flex-1">
                     {bookmark.image && bookmark.image !== '/default-icon.png' && (
-                      <div className="flex-shrink-0">
-                        <img
+                      <div className="flex-shrink-0 relative w-20 h-20">
+                        <Image
                           src={bookmark.image}
                           alt={`Logo de ${bookmark.title}`}
-                          className="w-20 h-20 object-cover rounded-lg border border-gray-100"
+                          fill
+                          className="object-cover rounded-lg border border-gray-100"
                         />
                       </div>
                     )}
@@ -131,7 +129,6 @@ export default function BookmarksPage() {
                     </div>
                   </div>
 
-                  {/* Botones */}
                   <div className="flex gap-2 flex-shrink-0 ml-6 items-start">
                     <Link
                       href={`/bookmark/view/${bookmark.id}`}

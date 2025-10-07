@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import { useRouter } from "next/navigation";
@@ -6,31 +7,45 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState<string>("");
+  const [userName, setUserName] = useState<string>("Usuario");
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-      if (!session) {
-        router.push("/auth/login");
-      } else {
-        const { data: profileData, error } = await supabase
-          .from("profiles") 
+        if (sessionError) {
+          console.error("Error al obtener la sesión:", sessionError.message);
+          setLoading(false);
+          return;
+        }
+
+        if (!session) {
+          router.push("/auth/login");
+          return;
+        }
+
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
           .select("full_name")
           .eq("id", session.user.id)
           .single();
 
-        if (profileData?.full_name) {
-          setUserName(profileData.full_name);
-        } else {
-          // si no hay full_name, usamos email
-          setUserName(session.user.email || "Usuario");
+        if (profileError) {
+          console.error("Error al obtener perfil:", profileError.message);
         }
 
+        setUserName(profileData?.full_name || session.user.email || "Usuario");
+      } catch (err: unknown) {
+        console.error("Error inesperado:", err);
+      } finally {
         setLoading(false);
       }
     };
+
     checkSession();
   }, [router]);
 

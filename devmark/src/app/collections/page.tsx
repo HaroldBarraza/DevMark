@@ -18,9 +18,13 @@ export default function CollectionsPage() {
       try {
         const cols = await getCollectionsByUser(userId);
         setCollections(cols);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error al obtener colecciones:", err);
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Error desconocido");
+        }
       } finally {
         setLoading(false);
       }
@@ -33,10 +37,16 @@ export default function CollectionsPage() {
     try {
       await deleteCollection(id);
       setCollections(collections.filter((col) => col.id !== id));
-    } catch (err: any) {
-      console.error(err);
-      alert("No se pudo eliminar la colección");
-    }
+    } catch (err: unknown) {
+        console.error("Error al obtener colecciones:", err);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Error desconocido");
+        }
+      } finally {
+        setLoading(false);
+      }
   };
 
   return (

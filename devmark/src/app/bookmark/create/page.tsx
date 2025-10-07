@@ -10,11 +10,6 @@ type Collection = {
   name: string;
 };
 
-type Tag = {
-  id: string;
-  name: string;
-};
-
 export default function CreateBookmark() {
   const { userId } = useUser();
   const router = useRouter();

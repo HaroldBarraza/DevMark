@@ -26,14 +26,18 @@ export default function NewCollectionPage() {
         body: JSON.stringify({
           name,
           isPublic,
-          userId: userId, 
+          userId: userId,
         }),
       });
 
       if (!res.ok) throw new Error("Error al crear la colección");
       router.push("/collections");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error desconocido");
+      }
       setLoading(false);
     }
   };

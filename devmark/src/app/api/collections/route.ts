@@ -11,9 +11,13 @@ export async function GET(req: Request) {
   try {
     const collections = await getCollectionsByUser(userId);
     return NextResponse.json(collections || []); 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error al obtener colecciones:", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
     console.error("Error al obtener colecciones:", error);
-    return NextResponse.json([], { status: 500 }); 
+    return NextResponse.json({ error: "Error desconocido" }, { status: 500 });
   }
 }
 
@@ -24,8 +28,12 @@ export async function POST(req: Request) {
     const body = await req.json();
     const collection = await createCollection(body);
     return NextResponse.json(collection, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error al crear colección:", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
     console.error("Error al crear colección:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Error desconocido" }, { status: 500 });
   }
 }

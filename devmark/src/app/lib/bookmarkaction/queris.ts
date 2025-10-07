@@ -1,7 +1,6 @@
 // app/lib/bookmarkaction/queris.ts
 import sql from "@/app/lib/databse";
 import type { Bookmark } from "@/app/lib/types";
-import type { Tag } from "@/app/lib/types";
 
 // -----------------------------
 // GET ALL BOOKMARKS

@@ -3,7 +3,6 @@
 
 import { useState } from 'react';
 import Navbar from '@/app/components/sidebar';
-import { useUser } from '@/app/context/UserContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,7 +10,6 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isNavbarExpanded, setIsNavbarExpanded] = useState(false);
-  const { userId } = useUser();
 
   const handleToggleNavbar = () => {
     setIsNavbarExpanded(!isNavbarExpanded);

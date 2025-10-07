@@ -25,6 +25,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ isExpanded }) => {
           .eq("id", userId)
           .single();
 
+        if (error) {
+          console.error("Error al obtener el email del usuario:", error.message);
+        } else if (data?.email) {
+          setUserEmail(data.email);
+        }
+
+
         if (data?.email) setUserEmail(data.email);
       }
     };
@@ -45,9 +52,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ isExpanded }) => {
       {/* Botón de usuario */}
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center w-full p-2 rounded hover:bg-gray-700 transition-colors ${
-          isExpanded ? "" : "justify-center"
-        }`}
+        className={`flex items-center w-full p-2 rounded hover:bg-gray-700 transition-colors ${isExpanded ? "" : "justify-center"
+          }`}
       >
         <span className="text-lg">👤</span>
         {isExpanded && <span className="ml-2">{userEmail}</span>}

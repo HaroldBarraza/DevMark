@@ -1,5 +1,5 @@
 import { supabase } from "@/app/lib/supabaseClient";
-import { Collection, CollectionBookmark } from "@/app/lib/types"; // ajusta la ruta
+import { Collection, CollectionBookmark, Bookmark } from "@/app/lib/types"; // ajusta la ruta
 
 // ======================================
 // CREATE
@@ -89,8 +89,6 @@ export async function deleteCollection(id: string) {
   return data as Collection;
 }
 
-// Borrado físico (opcional)
-// ⚠️ cuidado: elimina definitivamente
 export async function hardDeleteCollection(id: string) {
   const { error } = await supabase
     .from("collections")
@@ -118,11 +116,21 @@ export async function addBookmarkToCollection(
   return true;
 }
 
+
 // Obtener bookmarks de una colección
-export async function getBookmarksInCollection(collectionId: string) {
+export async function getBookmarksInCollection(
+  collectionId: string
+): Promise<(CollectionBookmark & { bookmarks: Bookmark })[]> {
+  type SupabaseRow = {
+    collectionId: string;
+    bookmarkId: number;
+    bookmarks: Bookmark[]; // Supabase retorna un array
+  };
+
   const { data, error } = await supabase
     .from("collection_bookmark")
     .select(`
+      collectionId,
       bookmarkId,
       bookmarks (
         id, title, link, description, image, createdAt
@@ -131,5 +139,14 @@ export async function getBookmarksInCollection(collectionId: string) {
     .eq("collectionId", collectionId);
 
   if (error) throw error;
-  return data as (CollectionBookmark & { bookmarks: any })[];
+
+  
+  const result: (CollectionBookmark & { bookmarks: Bookmark })[] =
+    (data as SupabaseRow[]).map((item) => ({
+      collectionId: item.collectionId,
+      bookmarkId: item.bookmarkId,
+      bookmarks: item.bookmarks[0], 
+    }));
+
+  return result;
 }

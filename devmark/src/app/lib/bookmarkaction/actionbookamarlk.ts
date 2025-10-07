@@ -155,7 +155,7 @@ export async function updateBookmark(
 
   const tagsToAdd = inputTags.filter(t => !currentTagNames.includes(t));
   for (const tagName of tagsToAdd) {
-    let tagRes = await sql`
+    const tagRes = await sql`
       SELECT id FROM "tags" WHERE name = ${tagName} AND user_id = ${userId};
     `;
 
