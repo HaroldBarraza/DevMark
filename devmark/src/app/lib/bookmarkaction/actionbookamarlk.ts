@@ -3,69 +3,112 @@
 import sql from '@/app/lib/databse'
 import { revalidatePath } from 'next/cache'
 
-// Add bookmark
-// Add bookmark with collections and tags
+// ==============================
+// Funciones auxiliares
+// ==============================
+
+function getBaseUrl() {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return 'http://localhost:3000';
+}
+
+async function scrapWebData(url: string) {
+  try {
+    const baseUrl = getBaseUrl();
+    const apiUrl = `${baseUrl}/api/scrape`;
+
+    console.log('📡 Llamando a API:', apiUrl);
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+
+    if (!response.ok) throw new Error('Error al extraer información de la URL');
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Error con la URL:', error);
+    return {
+      title: 'Título no disponible',
+      description: '',
+      image: '/default-icon.png',
+    };
+  }
+}
+
+// ==============================
+// CRUD de Bookmarks
+// ==============================
+
+// ➕ Add bookmark (con colecciones, tags y scraping)
 export async function addBookmark(formData: FormData, userId: string) {
+  const title = (formData.get('title') as string) || '';
+  const link = formData.get('link') as string;
+  const collectionIds = formData.getAll('collections') as string[];
+  const tagInput = (formData.get('tagsInput') as string) || '';
 
-    const title = formData.get('title') as string;
-    const link = formData.get('link') as string;
-    const collectionIds = formData.getAll('collections') as string[];
-    const tagInput = formData.get('tagsInput') as string; // campo de texto editable
+  if (!link) throw new Error('URL es requerida');
 
+  // Extraer información del sitio
+  const websiteData = await scrapWebData(link);
 
-    const res = await sql`
-    INSERT INTO "bookmarks" ("title", "link", "user_id")
-    VALUES (${title}, ${link}, ${userId})
+  // Crear bookmark
+  const res = await sql`
+    INSERT INTO "bookmarks" ("title", "link", "description", "image", "user_id")
+    VALUES (${websiteData.title || title}, ${link}, ${websiteData.description}, ${websiteData.image}, ${userId})
     RETURNING "id";
   `;
+  const bookmarkId = res[0].id;
 
-    const bookmarkId = res[0].id;
-
-    if (collectionIds.length > 0) {
-        await sql`
+  // Asociar colecciones
+  if (collectionIds.length > 0) {
+    await sql`
       INSERT INTO "collection_bookmarks" ("collection_id", "bookmark_id")
       SELECT x.id, ${bookmarkId} FROM UNNEST(${collectionIds}::uuid[]) AS x(id);
     `;
-    }
+  }
 
-    const inputTags = tagInput
-        ? tagInput.split(',').map(t => t.trim()).filter(Boolean)
-        : [];
+  // Manejo de tags
+  const inputTags = tagInput
+    .split(',')
+    .map(t => t.trim())
+    .filter(Boolean);
 
-    for (const tagName of inputTags) {
-
-        const existingTag = await sql`
+  for (const tagName of inputTags) {
+    const existingTag = await sql`
       SELECT id FROM "tags" WHERE name = ${tagName} AND user_id = ${userId};
     `;
 
-        let tagId: string;
-        if (existingTag.length > 0) {
-            tagId = existingTag[0].id;
-        } else {
-            // Crear tag nuevo
-            const newTag = await sql`
+    let tagId: string;
+    if (existingTag.length > 0) {
+      tagId = existingTag[0].id;
+    } else {
+      const newTag = await sql`
         INSERT INTO "tags" (name, user_id)
         VALUES (${tagName}, ${userId})
         RETURNING id;
       `;
-            tagId = newTag[0].id;
-        }
-
-
-        await sql`
-  INSERT INTO "bookmark_tags" ("bookmark_id", "tag_id", "user_id")
-  VALUES (${bookmarkId}, ${tagId}, ${userId})
-  ON CONFLICT DO NOTHING;
-`;
-
+      tagId = newTag[0].id;
     }
 
-    revalidatePath('/');
+    await sql`
+      INSERT INTO "bookmark_tags" ("bookmark_id", "tag_id", "user_id")
+      VALUES (${bookmarkId}, ${tagId}, ${userId})
+      ON CONFLICT DO NOTHING;
+    `;
+  }
+
+  revalidatePath('/bookmark');
 }
 
-// Update bookmark
+// ✏️ Update bookmark
 export async function updateBookmark(
-  id: string,           // <-- string
+  id: string,
   formData: FormData,
   userId: string
 ) {
@@ -74,7 +117,6 @@ export async function updateBookmark(
   const collectionIds = formData.getAll('collections') as string[];
   const tagsInput = (formData.get('tagsInput') as string) || '';
 
-  // 1️⃣ Actualizar bookmark asegurando userId
   await sql`
     UPDATE "bookmarks"
     SET "title" = ${title},
@@ -83,9 +125,8 @@ export async function updateBookmark(
     WHERE "id" = ${id} AND "user_id" = ${userId};
   `;
 
-  // 2️⃣ Actualizar colecciones
+  // Colecciones
   await sql`DELETE FROM "collection_bookmarks" WHERE "bookmark_id" = ${id};`;
-
   if (collectionIds.length > 0) {
     await sql`
       INSERT INTO "collection_bookmarks" ("collection_id", "bookmark_id")
@@ -93,12 +134,8 @@ export async function updateBookmark(
     `;
   }
 
-  // 3️⃣ Manejar tags
-  const inputTags = tagsInput
-    .split(',')
-    .map(t => t.trim())
-    .filter(Boolean);
-
+  // Tags
+  const inputTags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
   const currentTagsRes = await sql`
     SELECT t.id, t.name
     FROM "tags" t
@@ -144,7 +181,8 @@ export async function updateBookmark(
   revalidatePath('/bookmark');
 }
 
-export async function deleteBookmark(id: string, userId: string) {  // <-- string
+// 🗑️ Delete bookmark
+export async function deleteBookmark(id: string, userId: string) {
   await sql`DELETE FROM "collection_bookmarks" WHERE "bookmark_id" = ${id};`;
   await sql`DELETE FROM "bookmark_tags" WHERE "bookmark_id" = ${id};`;
   await sql`

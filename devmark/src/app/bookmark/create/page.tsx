@@ -3,9 +3,10 @@ import { addBookmark } from '@/app/lib/bookmarkaction/actionbookamarlk';
 import { useUser } from '@/app/context/UserContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 type Collection = {
-  id: string; // UUID
+  id: string;
   name: string;
 };
 
@@ -20,9 +21,7 @@ export default function CreateBookmark() {
 
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
-
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [tagsInput, setTagsInput] = useState(''); // campo editable
+  const [tagsInput, setTagsInput] = useState('');
 
   // Traer collections
   useEffect(() => {
@@ -33,25 +32,11 @@ export default function CreateBookmark() {
       .catch(err => console.error('Error fetching collections:', err));
   }, [userId]);
 
-  // Traer tags existentes
-  useEffect(() => {
-    if (!userId) return;
-    fetch(`/api/tag?userId=${userId}`)
-      .then(res => res.json())
-      .then((data: Tag[]) => setTags(data))
-      .catch(err => console.error('Error fetching tags:', err));
-  }, [userId]);
-
   // Acción de crear bookmark
   async function createBookmarkAction(formData: FormData) {
     if (!userId) throw new Error('User ID is missing');
-
-    // Collections
     selectedCollections.forEach(id => formData.append('collections', id));
-
-    // Tags (campo editable)
-    formData.append('tagsInput', tagsInput); // enviamos texto para crear tags al vuelo
-
+    formData.append('tagsInput', tagsInput);
     await addBookmark(formData, userId);
     router.push('/bookmark');
   }
@@ -61,7 +46,7 @@ export default function CreateBookmark() {
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Create a Bookmark</h2>
         <form action={createBookmarkAction} className="flex flex-col gap-4">
-          
+
           {/* Title */}
           <label className="flex flex-col">
             <span className="mb-1 font-medium">Title</span>
@@ -123,6 +108,16 @@ export default function CreateBookmark() {
           >
             Create Bookmark
           </button>
+
+          {/* Back link */}
+          <div className="mt-4 text-center">
+            <Link
+              href="/bookmark"
+              className="text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              ← Back to Bookmarks
+            </Link>
+          </div>
         </form>
       </div>
     </div>

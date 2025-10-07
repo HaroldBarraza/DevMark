@@ -1,6 +1,5 @@
 'use client';
-
-import { useState, useEffect, FormEvent } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/context/UserContext';
 
@@ -9,12 +8,13 @@ type Bookmark = {
   id: string;
   title: string;
   link: string;
+  description?: string;
   tags?: Tag[];
 };
 
 export default function EditBookmark({ params }: { params: { id: string } }) {
   const { userId } = useUser();
-  const id = params.id; // uuid from the URL
+  const id = params.id;
   const router = useRouter();
 
   const [bookmark, setBookmark] = useState<Bookmark | null>(null);
@@ -23,7 +23,7 @@ export default function EditBookmark({ params }: { params: { id: string } }) {
 
   // Fetch bookmark data
   useEffect(() => {
-    if (!userId || !id) return; // evita fetch prematuro
+    if (!userId || !id) return;
 
     const fetchBookmark = async () => {
       try {
@@ -45,10 +45,8 @@ export default function EditBookmark({ params }: { params: { id: string } }) {
     fetchBookmark();
   }, [id, userId]);
 
-
-
-  if (loading) return <p>Cargando...</p>;
-  if (!bookmark) return <p>Bookmark no encontrado</p>;
+  if (loading) return <p className="text-center text-gray-600 mt-8">Cargando...</p>;
+  if (!bookmark) return <p className="text-center text-red-500 mt-8">Bookmark no encontrado</p>;
 
   // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -58,8 +56,8 @@ export default function EditBookmark({ params }: { params: { id: string } }) {
     const formData = new FormData(e.currentTarget);
     const title = formData.get('title') as string;
     const link = formData.get('link') as string;
+    const description = formData.get('description') as string;
 
-    // Convert tags input into array
     const tags = tagsInput
       .split(',')
       .map(t => t.trim())
@@ -69,7 +67,7 @@ export default function EditBookmark({ params }: { params: { id: string } }) {
       const res = await fetch(`/api/bookmarks/${id}?userId=${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, link, tags }),
+        body: JSON.stringify({ title, link, description, tags }),
       });
       if (!res.ok) throw new Error('Error updating bookmark');
       router.push('/bookmark');
@@ -79,59 +77,88 @@ export default function EditBookmark({ params }: { params: { id: string } }) {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-      <h1>Edit Bookmark</h1>
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-200 mt-10">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Bookmark</h1>
+        <p className="text-gray-600">Update your bookmark information</p>
+      </div>
 
       <form onSubmit={handleSubmit}>
         {/* Title */}
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="title">Title:</label>
+        <div className="mb-6">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            Title *
+          </label>
           <input
             type="text"
             id="title"
             name="title"
             defaultValue={bookmark.title}
             required
-            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+            placeholder="Enter bookmark title"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
           />
         </div>
 
         {/* Link */}
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="link">URL:</label>
+        <div className="mb-6">
+          <label htmlFor="link" className="block text-sm font-medium text-gray-700 mb-2">
+            URL *
+          </label>
           <input
             type="url"
             id="link"
             name="link"
             defaultValue={bookmark.link}
             required
-            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+            placeholder="https://example.com"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="mb-6">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            defaultValue={bookmark.description}
+            rows={4}
+            placeholder="Optional description for your bookmark"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
           />
         </div>
 
         {/* Tags */}
-        <div style={{ marginBottom: '20px' }}>
-          <label htmlFor="tags">Tags (separados por coma):</label>
+        <div className="mb-8">
+          <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
+            Tags (separated by commas)
+          </label>
           <input
             type="text"
             id="tags"
             name="tags"
             value={tagsInput}
             onChange={e => setTagsInput(e.target.value)}
-            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+            placeholder="e.g. work, personal, design"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
           />
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        {/* Buttons */}
+        <div className="flex gap-3 pt-4 border-t border-gray-200">
           <button
             type="submit"
-            style={{ padding: '10px 20px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}
+            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 shadow-sm"
           >
             💾 Save Changes
           </button>
+
           <a
             href="/bookmark"
-            style={{ padding: '10px 20px', backgroundColor: '#6c757d', color: 'white', textDecoration: 'none', borderRadius: '4px' }}
+            className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium flex items-center gap-2"
           >
             ❌ Cancel
           </a>
