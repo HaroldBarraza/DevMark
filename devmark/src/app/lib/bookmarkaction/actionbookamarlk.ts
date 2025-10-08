@@ -155,7 +155,7 @@ export async function updateBookmark(
 
   const tagsToAdd = inputTags.filter(t => !currentTagNames.includes(t));
   for (const tagName of tagsToAdd) {
-     const tagRes = await sql`
+    const tagRes = await sql`
       SELECT id FROM "tags" WHERE name = ${tagName} AND user_id = ${userId};
     `;
 
@@ -185,15 +185,15 @@ export async function deleteBookmark(id: string, userId: string): Promise<boolea
   try {
     await sql`DELETE FROM "collection_bookmarks" WHERE "bookmark_id" = ${id};`;
     await sql`DELETE FROM "bookmark_tags" WHERE "bookmark_id" = ${id};`;
-    
+
     const result = await sql`
       DELETE FROM "bookmarks"
       WHERE "id" = ${id} AND "user_id" = ${userId}
       RETURNING "id";
     `;
-    
+
     revalidatePath('/bookmark');
-    
+
     // Retorna true si se eliminó algún registro, false si no
     return result.length > 0;
   } catch (error) {
