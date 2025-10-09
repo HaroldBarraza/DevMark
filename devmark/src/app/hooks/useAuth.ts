@@ -1,22 +1,16 @@
-// src/app/hooks/useAuth.ts
 import { supabase } from "@/app/lib/supabaseClient";
+import type { Profile } from "@/app/lib/types";
+import type { PostgrestError, AuthError } from "@supabase/supabase-js";
 
 // ======================================
-// Interfaces
+// Tipos e Interfaces
 // ======================================
-export interface Profile {
-  id: string;
-  email: string;
-  full_name?: string;
-  avatar_url?: string;
-}
+export type ProfileUpdates = Partial<Omit<Profile, "id">>;
 
-export type ProfileUpdates = Partial<Omit<Profile, "id" | "email">>;
-
-// Tipo genérico para las respuestas de Supabase
+// Acepta tanto errores de Auth como de PostgREST
 interface SupabaseResponse<T> {
   data: T | null;
-  error: Error | null;
+  error: PostgrestError | AuthError | null;
 }
 
 // ======================================
@@ -27,12 +21,28 @@ export const signUpUser = async (
   password: string
 ): Promise<SupabaseResponse<{ user: { id: string; email: string } }>> => {
   const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error || !data.user) return { data: null, error };
+
+  // Esperar a que el trigger cree el perfil
+  let profile = null;
+  for (let i = 0; i < 5; i++) {
+    const { data: p } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user.id)
+      .single();
+
+    if (p) {
+      profile = p;
+      break;
+    }
+
+    await new Promise((res) => setTimeout(res, 300)); // Espera 300 ms
+  }
 
   return {
-    data: data?.user
-      ? { user: { id: data.user.id, email: data.user.email! } } // email forzado
-      : null,
-    error: error ?? null,
+    data: { user: { id: data.user.id, email: data.user.email! } },
+    error: profile ? null : error,
   };
 };
 
@@ -43,13 +53,16 @@ export const signInUser = async (
   email: string,
   password: string
 ): Promise<SupabaseResponse<{ user: { id: string; email: string } }>> => {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
   return {
     data: data?.user
       ? { user: { id: data.user.id, email: data.user.email! } }
       : null,
-    error: error ?? null,
+    error,
   };
 };
 
@@ -65,10 +78,7 @@ export const getProfile = async (
     .eq("id", userId)
     .single();
 
-  return {
-    data: data ?? null,
-    error: error ?? null,
-  };
+  return { data, error };
 };
 
 // ======================================
@@ -80,14 +90,14 @@ export const updateProfile = async (
 ): Promise<SupabaseResponse<Profile>> => {
   const { data, error } = await supabase
     .from("profiles")
-    .update(updates)
+    .update({
+      ...updates,
+      updatedat: new Date().toISOString(),
+    })
     .eq("id", userId)
     .single();
 
-  return {
-    data: data ?? null,
-    error: error ?? null,
-  };
+  return { data, error };
 };
 
 // ======================================
@@ -95,5 +105,5 @@ export const updateProfile = async (
 // ======================================
 export const signOutUser = async (): Promise<SupabaseResponse<null>> => {
   const { error } = await supabase.auth.signOut();
-  return { data: null, error: error ?? null };
+  return { data: null, error };
 };

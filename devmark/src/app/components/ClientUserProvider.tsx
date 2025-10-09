@@ -13,7 +13,7 @@ export default function ClientUserProvider({ children }: { children: React.React
     };
     getUser();
 
-    // También escuchar cambios de sesión
+    
     supabase.auth.onAuthStateChange((_event, session) => {
       setUserId(session?.user.id ?? null);
     });
