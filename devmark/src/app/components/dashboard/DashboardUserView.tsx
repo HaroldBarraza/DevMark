@@ -1,5 +1,4 @@
 import StatsCard from "./StatsCard";
-import type { Bookmark } from "@/app/lib/types";
 import type { useDashboardData } from "@/app/hooks/useDashboardData";
 
 interface DashboardUserViewProps {

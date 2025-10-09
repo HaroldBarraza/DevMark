@@ -39,7 +39,7 @@ export default function LoginPage() {
     if (loginError) {
       setError(loginError.message);
     } else {
-      router.push("/"); // aquí redirige a la raíz
+      router.push("/dashboard"); // aquí redirige a dashboard
     }
   };
 

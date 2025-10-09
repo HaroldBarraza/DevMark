@@ -1,6 +1,12 @@
 import StatsCard from "./StatsCard";
 
-export default function DashboardAdminView({ stats }: { stats: any }) {
+interface DashboardStats {
+  totalCollections: number;
+  totalBookmarks: number;
+  totalTags: number;
+}
+
+export default function DashboardAdminView({ stats }: { stats: DashboardStats }) {
   return (
     <section className="grid md:grid-cols-3 gap-4">
       <StatsCard title="Total Colecciones" value={stats?.totalCollections ?? 0} />
@@ -9,3 +15,4 @@ export default function DashboardAdminView({ stats }: { stats: any }) {
     </section>
   );
 }
+
