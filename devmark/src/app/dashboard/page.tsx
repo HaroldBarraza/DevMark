@@ -3,6 +3,7 @@
 import { useDashboardData } from "@/app/hooks/useDashboardData";
 import DashboardUserView from "@/app/components/dashboard/DashboardUserView";
 import DashboardAdminView from "@/app/components/dashboard/DashboardAdminView";
+import DashboardTrendsView from "../components/dashboard/DashboardLineChart";
 
 export default function DashboardPage() {
   const { profile, stats, recentBookmarks, loading } = useDashboardData(); // <- extraemos recentBookmarks
@@ -17,10 +18,12 @@ export default function DashboardPage() {
       </h1>
 
       {profile.role === "ADMIN" ? (
-        <DashboardAdminView stats={stats} />
+        <DashboardAdminView stats={stats ?? { totalCollections: 0, totalBookmarks: 0, totalTags: 0 }} />
+
       ) : (
         <DashboardUserView stats={stats} recentBookmarks={recentBookmarks} /> // <- pasamos la prop
       )}
+      <DashboardTrendsView userId={profile.id} role={profile.role} />
     </main>
   );
 }

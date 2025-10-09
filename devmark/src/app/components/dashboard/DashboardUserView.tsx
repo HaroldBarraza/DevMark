@@ -1,3 +1,4 @@
+import { TrendingUp } from "lucide-react";
 import StatsCard from "./StatsCard";
 import type { useDashboardData } from "@/app/hooks/useDashboardData";
 
@@ -10,9 +11,24 @@ export default function DashboardUserView({ stats, recentBookmarks }: DashboardU
   return (
     <>
       <section className="grid md:grid-cols-3 gap-4 mb-6">
-        <StatsCard title="Mis Colecciones" value={stats?.totalCollections ?? 0} />
-        <StatsCard title="Mis Bookmarks" value={stats?.totalBookmarks ?? 0} />
-        <StatsCard title="Mis Tags" value={stats?.totalTags ?? 0} />
+        <StatsCard
+          icon={TrendingUp}
+          label="Mis Colecciones"
+          value={stats?.totalCollections ?? 0}
+          color="bg-purple-500"
+        />
+        <StatsCard
+          icon={TrendingUp}
+          label="Mis Bookmarks"
+          value={stats?.totalBookmarks ?? 0}
+          color="bg-indigo-500"
+        />
+        <StatsCard
+          icon={TrendingUp}
+          label="Mis Tags"
+          value={stats?.totalTags ?? 0}
+          color="bg-green-500"
+        />
       </section>
 
       <section>

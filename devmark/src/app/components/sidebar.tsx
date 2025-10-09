@@ -50,6 +50,8 @@ const Navbar: React.FC<NavbarProps> = ({ isExpanded, onToggle }) => {
   }, [userId]);
 
   const navItems: NavItem[] = [
+    // Dashboard link
+    { id: 'dashboard', icon: '📊', text: 'Dashboard', url: '/dashboard' },
     { id: 'all', icon: '📁', text: 'Todos los marcadores', url: '/bookmark' },
     { id: 'collections', icon: '🗂️', text: 'Colecciones' },
     { id: 'tags', icon: '🏷️', text: 'Etiquetas' },
