@@ -67,7 +67,7 @@ export default function CollectionsPage() {
         <p className="text-red-500 bg-red-50 p-4 rounded-lg border border-red-200">{error}</p>
       ) : collections.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg mb-4">You don't have any collections yet.</p>
+          <p className="text-gray-500 text-lg mb-4">You do not have any collections yet.</p>
           <button
             onClick={() => router.push("/collections/collectionForm")}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium"
