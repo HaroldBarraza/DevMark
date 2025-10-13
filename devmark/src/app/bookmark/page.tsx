@@ -1,17 +1,18 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Bookmark } from '@/app/lib/types';
 import { useUser } from '@/app/context/UserContext';
 import Link from 'next/link';
 
 /**
  * Main bookmarks page displaying user's saved bookmarks
- * Supports viewing, editing, and deleting bookmarks
+ * Supports viewing, editing, deleting and searching bookmarks
  */
 export default function BookmarksPage() {
   const { userId } = useUser();
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   /**
    * Extracts domain name from URL for display purposes
@@ -44,6 +45,33 @@ export default function BookmarksPage() {
   }, [userId]);
 
   /**
+   * Filters bookmarks based on search query across title, description, link, and tags
+   */
+  const filteredBookmarks = useMemo(() => {
+    if (!searchQuery.trim()) return bookmarks;
+
+    const query = searchQuery.toLowerCase().trim();
+    
+    return bookmarks.filter(bookmark => {
+      // Search in title
+      if (bookmark.title?.toLowerCase().includes(query)) return true;
+      
+      // Search in description
+      if (bookmark.description?.toLowerCase().includes(query)) return true;
+      
+      // Search in link/URL
+      if (bookmark.link?.toLowerCase().includes(query)) return true;
+      
+      // Search in tags
+      if (bookmark.tags?.some(tag => 
+        tag.name.toLowerCase().includes(query)
+      )) return true;
+
+      return false;
+    });
+  }, [bookmarks, searchQuery]);
+
+  /**
    * Handles bookmark deletion with confirmation
    * @param id - The ID of the bookmark to delete
    */
@@ -71,10 +99,10 @@ export default function BookmarksPage() {
     <div className="container mx-auto p-4">
       <div className="bookmarks">
         {/* Page Header */}
-        <h2 className="text-2xl font-bold mb-6">Bookmarks</h2>
-
-        {/* Create New Bookmark Button */}
-        <div className="create mb-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Bookmarks</h2>
+          
+          {/* Create New Bookmark Button */}
           <Link
             href="/bookmark/create"
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
@@ -83,12 +111,93 @@ export default function BookmarksPage() {
           </Link>
         </div>
 
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="Search bookmarks by title, description, URL, or tags..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg 
+                className="h-5 w-5 text-gray-400" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+                />
+              </svg>
+            </div>
+            
+            {/* Clear search button */}
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              >
+                <svg 
+                  className="h-5 w-5 text-gray-400 hover:text-gray-600" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M6 18L18 6M6 6l12 12" 
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+          
+          {/* Search results info */}
+          {searchQuery && (
+            <div className="mt-2 text-sm text-gray-600">
+              Found {filteredBookmarks.length} bookmark{filteredBookmarks.length !== 1 ? 's' : ''} 
+              {filteredBookmarks.length !== bookmarks.length && 
+                ` (of ${bookmarks.length} total)`
+              }
+            </div>
+          )}
+        </div>
+
         {/* Bookmarks List */}
         {bookmarks.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No bookmarks yet</p>
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg mb-4">No bookmarks yet</p>
+            <Link
+              href="/bookmark/create"
+              className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors inline-block"
+            >
+              Create Your First Bookmark
+            </Link>
+          </div>
+        ) : filteredBookmarks.length === 0 && searchQuery ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg mb-2">No bookmarks found for "{searchQuery}"</p>
+            <p className="text-gray-400 text-sm">
+              Try searching by title, description, URL, or tags
+            </p>
+            <button
+              onClick={() => setSearchQuery('')}
+              className="mt-4 text-blue-500 hover:text-blue-700 underline"
+            >
+              Clear search
+            </button>
+          </div>
         ) : (
           <div className="space-y-4">
-            {bookmarks.map((bookmark: Bookmark) => (
+            {filteredBookmarks.map((bookmark: Bookmark) => (
               <div
                 key={bookmark.id}
                 className="border border-gray-200 rounded-xl p-5 bg-white hover:shadow-md transition-all duration-200"
