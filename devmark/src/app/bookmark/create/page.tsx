@@ -1,4 +1,3 @@
-// src/app/bookmark/create/page.tsx - VERSIÓN MEJORADA
 'use client';
 import { addBookmark } from '@/app/lib/bookmarkaction/actionbookamarlk';
 import { useUser } from '@/app/context/UserContext';
@@ -6,41 +5,49 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
 
+/**
+ * Page component for creating new bookmarks
+ * Handles URL input and automatic metadata extraction
+ */
 export default function CreateBookmark() {
   const { userId } = useUser();
   const router = useRouter();
   const [tagsInput, setTagsInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Acción de crear bookmark
+  /**
+   * Handles bookmark creation form submission
+   * @param formData - Form data containing URL and optional tags
+   */
   async function createBookmarkAction(formData: FormData) {
     if (!userId) {
-      alert('Debes iniciar sesión para crear bookmarks');
+      alert('You must be logged in to create bookmarks');
       return;
     }
 
     setLoading(true);
     try {
-      // Agregar tags al formData (si el usuario los proporcionó)
+      // Add tags to formData if provided by user
       formData.append('tagsInput', tagsInput);
       
       await addBookmark(formData, userId);
       router.push('/bookmark');
     } catch (error) {
       console.error('Error creating bookmark:', error);
-      alert('Error al crear el bookmark');
+      alert('Error creating bookmark');
     } finally {
       setLoading(false);
     }
   }
 
+  // Redirect to login if user is not authenticated
   if (!userId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-lg mb-4">Debes iniciar sesión para crear bookmarks</p>
+          <p className="text-lg mb-4">You must be logged in to create bookmarks</p>
           <Link href="/auth/login" className="bg-blue-500 text-white px-4 py-2 rounded">
-            Iniciar Sesión
+            Sign In
           </Link>
         </div>
       </div>
@@ -51,16 +58,16 @@ export default function CreateBookmark() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
         
-        {/* Header */}
+        {/* Header Section */}
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Create New Bookmark</h1>
           <p className="text-gray-600">Enter a website URL to save as bookmark</p>
         </div>
 
-        {/* Formulario */}
+        {/* Bookmark Creation Form */}
         <form action={createBookmarkAction} className="space-y-6">
           
-          {/* Link - Campo principal y requerido */}
+          {/* URL Input - Required Field */}
           <div>
             <label htmlFor="link" className="block text-sm font-medium text-gray-700 mb-2">
               Website URL *
@@ -75,24 +82,25 @@ export default function CreateBookmark() {
             />
           </div>
 
-          {/* Tags - Opcional */}
+          {/* Tags Input - Optional Field */}
           <div>
             <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
-              Tags (opcional)
+              Tags (optional)
             </label>
             <input
               type="text"
               id="tags"
-              placeholder="Ej: trabajo, personal, programación, recetas"
+              placeholder="Example: work, personal, programming, recipes"
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
             />
             <p className="text-sm text-green-600 mt-2">
-              ✅ El título, descripción e imagen se obtendrán automáticamente
+              Title, description and image will be automatically extracted
             </p>
           </div>
-          {/* Botón de envío */}
+
+          {/* Submit Button */}
           <button 
             type="submit"
             disabled={loading}
@@ -101,15 +109,15 @@ export default function CreateBookmark() {
             {loading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Creando Bookmark...
+                Creating Bookmark...
               </>
             ) : (
-              '➕ Add Bookmark'
+              'Add Bookmark'
             )}
           </button>
         </form>
 
-        {/* Enlace de regreso */}
+        {/* Back Navigation */}
         <div className="mt-6 text-center">
           <Link 
             href="/bookmark" 

@@ -6,6 +6,10 @@ import Link from 'next/link';
 import { useUser } from '@/app/context/UserContext';
 import { Bookmark } from '@/app/lib/types';
 
+/**
+ * Page component that displays all bookmarks associated with a specific tag
+ * Shows tag information and filtered bookmarks with actions
+ */
 export default function TagBookmarksPage() {
   const params = useParams();
   const tagId = params.id as string;
@@ -15,16 +19,17 @@ export default function TagBookmarksPage() {
   const [tagName, setTagName] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
+  // Fetch tag information and associated bookmarks
   useEffect(() => {
     if (!userId || !tagId) return;
 
-    // Fetch tag info
+    // Fetch tag details
     fetch(`/api/tag/${tagId}`)
       .then(res => res.json())
       .then(data => setTagName(data.name))
       .catch(err => console.error('Error fetching tag:', err));
 
-    // Fetch bookmarks with this tag
+    // Fetch bookmarks with this specific tag
     fetch(`/api/tag/${tagId}/bookmarks?userId=${userId}`)
       .then(res => res.json())
       .then((data: Bookmark[]) => {
@@ -37,80 +42,80 @@ export default function TagBookmarksPage() {
       });
   }, [userId, tagId]);
 
-  if (loading) return <p>Cargando...</p>;
+  // Show loading state while fetching data
+  if (loading) return <p className="text-center py-8">Loading...</p>;
 
   return (
     <div className="container mx-auto p-6">
+      {/* Page Header */}
       <div className="mb-6">
         <Link 
           href="/bookmark" 
-          className="text-blue-600 hover:underline mb-4 inline-block"
+          className="text-blue-600 hover:underline mb-4 inline-block transition-colors"
         >
-          ← Volver a todos los bookmarks
+          ← Back to all bookmarks
         </Link>
         
-        <h1 className="text-3xl font-bold mb-2">
-          Bookmarks con etiqueta: <span className="text-indigo-600">{tagName}</span>
+        <h1 className="text-3xl font-bold mb-2 text-gray-900">
+          Bookmarks with tag: <span className="text-indigo-600">{tagName}</span>
         </h1>
         <p className="text-gray-600">
-          {bookmarks.length} {bookmarks.length === 1 ? 'bookmark' : 'bookmarks'}
+          {bookmarks.length} {bookmarks.length === 1 ? 'bookmark' : 'bookmarks'} found
         </p>
       </div>
 
+      {/* Bookmarks List */}
       {bookmarks.length === 0 ? (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-          <p className="text-gray-600">No hay bookmarks con esta etiqueta</p>
+          <p className="text-gray-600">No bookmarks found with this tag</p>
         </div>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className="space-y-4">
           {bookmarks.map(bookmark => (
             <li
               key={bookmark.id}
-              style={{
-                border: '1px solid #ddd',
-                padding: '15px',
-                margin: '10px 0',
-                borderRadius: '5px',
-                backgroundColor: 'white'
-              }}
+              className="border border-gray-200 p-4 rounded-lg bg-white hover:shadow-md transition-shadow"
             >
-              {/* Imagen del bookmark */}
+              <div className="flex items-start gap-4">
+                {/* Bookmark Thumbnail */}
                 {bookmark.image && bookmark.image !== '/default-icon.png' && (
-                <div className="flex-shrink-0">
-                  <img
-                    src={bookmark.image}  
-                    alt={`Logo de ${bookmark.title}`}
-                    className="w-20 h-20 object-cover rounded-lg border border-gray-100"/>
-                    </div>
-                  )}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h4 style={{ margin: '0 0 5px 0' }}>{bookmark.title}</h4>
+                  <div className="flex-shrink-0">
+                    <img
+                      src={bookmark.image}  
+                      alt={`${bookmark.title} website logo`}
+                      className="w-20 h-20 object-cover rounded-lg border border-gray-100"
+                    />
+                  </div>
+                )}
+                
+                {/* Bookmark Content */}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-gray-900 mb-2">{bookmark.title}</h4>
                   <a 
                     href={bookmark.link} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 hover:underline text-sm block mb-2 break-all"
                   >
                     {bookmark.link}
                   </a>
-                  <p style={{ margin: '5px 0 0 0', color: '#555' }}>
-                    {bookmark.description}
-                  </p>
+                  {bookmark.description && (
+                    <p className="text-gray-600 text-sm mb-3">
+                      {bookmark.description}
+                    </p>
+                  )}
 
-                  {/* Tags */}
+                  {/* Tags Display */}
                   {bookmark.tags && bookmark.tags.length > 0 && (
-                    <div style={{ marginTop: '8px', display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                    <div className="flex flex-wrap gap-2 mt-2">
                       {bookmark.tags.map(tag => (
                         <span
                           key={tag.id}
-                          style={{
-                            backgroundColor: tag.id === tagId ? '#818cf8' : '#e0e0e0',
-                            color: tag.id === tagId ? 'white' : '#333',
-                            padding: '2px 6px',
-                            borderRadius: '12px',
-                            fontSize: '12px'
-                          }}
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            tag.id === tagId 
+                              ? 'bg-indigo-500 text-white' 
+                              : 'bg-gray-200 text-gray-700'
+                          }`}
                         >
                           {tag.name}
                         </span>
@@ -119,36 +124,23 @@ export default function TagBookmarksPage() {
                   )}
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                {/* Action Buttons */}
+                <div className="flex gap-2 flex-shrink-0">
+                  <Link
+                    href={`/bookmark/edit/${bookmark.id}`}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-2 rounded text-sm transition-colors"
+                  >
+                    Edit
+                  </Link>
+                  
                   <form action={`/api/bookmarks/delete/${bookmark.id}`} method="POST">
                     <button
                       type="submit"
-                      style={{
-                        padding: '5px 10px',
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '3px',
-                        cursor: 'pointer'
-                      }}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm transition-colors cursor-pointer"
                     >
-                      🗑️ Delete
+                      Delete
                     </button>
                   </form>
-
-                  <Link
-                    href={`/bookmark/edit/${bookmark.id}`}
-                    style={{
-                      padding: '5px 10px',
-                      backgroundColor: '#ffc107',
-                      color: 'black',
-                      textDecoration: 'none',
-                      borderRadius: '3px',
-                      display: 'inline-block'
-                    }}
-                  >
-                    ✏️ Edit
-                  </Link>
                 </div>
               </div>
             </li>

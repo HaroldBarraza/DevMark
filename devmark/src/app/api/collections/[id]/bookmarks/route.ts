@@ -2,6 +2,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/app/lib/databse';
 
+/**
+ * GET handler for retrieving all bookmarks within a specific collection
+ * Returns bookmarks with their associated tags for the authenticated user
+ */
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -10,10 +14,12 @@ export async function GET(
     const { id: collectionId } = await params;
     const userId = req.nextUrl.searchParams.get('userId');
 
+    // Validate required parameters
     if (!userId) {
       return NextResponse.json({ error: 'User ID missing' }, { status: 400 });
     }
 
+    // Query to fetch bookmarks with their tags for the specified collection
     const bookmarks = await sql`
       SELECT 
         b.id, 

@@ -12,6 +12,10 @@ type Bookmark = {
   image: string | null;
 };
 
+/**
+ * Page component for displaying bookmarks within a specific collection
+ * Fetches and displays all bookmarks associated with the collection
+ */
 export default function CollectionBookmarksPage() {
   const params = useParams();
   const router = useRouter();
@@ -20,6 +24,7 @@ export default function CollectionBookmarksPage() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch bookmarks when collection ID is available
   useEffect(() => {
     if (!collectionId) return;
 
@@ -35,47 +40,57 @@ export default function CollectionBookmarksPage() {
       });
   }, [collectionId]);
 
-  if (loading) return <p className="text-center mt-8">Cargando bookmarks...</p>;
+  // Show loading state while fetching data
+  if (loading) return <p className="text-center mt-8">Loading bookmarks...</p>;
 
   return (
     <div className="max-w-3xl mx-auto p-6">
+      {/* Page Header with Navigation */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Bookmarks de la colección</h1>
+        <h1 className="text-2xl font-bold">Collection Bookmarks</h1>
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
           onClick={() => router.back()}
         >
-          ← Volver
+          Back
         </button>
       </div>
 
+      {/* Bookmarks List */}
       {bookmarks.length === 0 ? (
-        <p>No hay bookmarks en esta colección.</p>
+        <p className="text-center text-gray-500 py-8">No bookmarks in this collection.</p>
       ) : (
         <ul className="space-y-4">
-          {bookmarks.map((b) => (
+          {bookmarks.map((bookmark) => (
             <li
-              key={b.id}
-              className="border p-4 rounded shadow flex justify-between items-center"
+              key={bookmark.id}
+              className="border border-gray-200 p-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow"
             >
-              <div>
-                <h3 className="font-semibold">{b.title}</h3>
-                <a
-                  href={b.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline text-sm"
+              <div className="flex justify-between items-start">
+                {/* Bookmark Content */}
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 mb-2">{bookmark.title}</h3>
+                  <a
+                    href={bookmark.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline text-sm block mb-2 break-all"
+                  >
+                    {bookmark.link}
+                  </a>
+                  {bookmark.description && (
+                    <p className="text-gray-600 text-sm">{bookmark.description}</p>
+                  )}
+                </div>
+                
+                {/* Edit Action */}
+                <Link
+                  href={`/bookmark/edit/${bookmark.id}`}
+                  className="bg-yellow-400 text-gray-900 px-3 py-2 rounded hover:bg-yellow-500 transition-colors ml-4 flex-shrink-0"
                 >
-                  {b.link}
-                </a>
-                {b.description && <p className="text-gray-600">{b.description}</p>}
+                  Edit
+                </Link>
               </div>
-              <Link
-                href={`/bookmark/edit/${b.id}`}
-                className="bg-yellow-400 px-3 py-1 rounded hover:bg-yellow-500"
-              >
-                Editar
-              </Link>
             </li>
           ))}
         </ul>

@@ -1,32 +1,54 @@
-// src/app/api/tag/route.ts - CORREGIDO
 import { NextRequest, NextResponse } from "next/server";
 import { createTag, getTagsByUser } from "@/app/lib/tags/tagRepository";
 
+/**
+ * GET handler for retrieving all tags for a specific user
+ * Returns empty array if no user ID provided
+ */
 export async function GET(req: NextRequest) {
-  const userId = req.nextUrl.searchParams.get("userId");
-  if (!userId) return NextResponse.json([], { status: 200 });
-  
-  const tags = await getTagsByUser(userId);
-  return NextResponse.json(tags);
-}
+  try {
+    const userId = req.nextUrl.searchParams.get("userId");
     
+    // Return empty array if no user ID provided
+    if (!userId) return NextResponse.json([], { status: 200 });
+
+    const tags = await getTagsByUser(userId);
+    return NextResponse.json(tags);
+  } catch (error) {
+    console.error('Error fetching tags:', error);
+    return NextResponse.json([], { status: 500 });
+  }
+}
+
+/**
+ * POST handler for creating a new tag
+ * Requires tag name and user ID in request body
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { name, userId } = body;
 
-    if (!name || !userId) 
-      return NextResponse.json({ error: "Missing name or userId" }, { status: 400 });
+    // Validate required fields
+    if (!name || !userId) {
+      return NextResponse.json(
+        { error: "Tag name and user ID are required" }, 
+        { status: 400 }
+      );
+    }
 
-    // ✅ CORREGIDO: Pasar el objeto con las propiedades correctas
-    const tag = await createTag({ 
-      name, 
-      user_id: userId  // Cambiar userId por user_id
+    // Create tag with proper field mapping
+    const tag = await createTag({
+      name,
+      user_id: userId  // Map to database column name
     });
-    
+
     return NextResponse.json(tag, { status: 201 });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Failed to create tag" }, { status: 500 });
+  } catch (error) {
+    console.error('Error creating tag:', error);
+    return NextResponse.json(
+      { error: "Failed to create tag" }, 
+      { status: 500 }
+    );
   }
 }
