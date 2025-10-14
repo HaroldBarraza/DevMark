@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            width: 350px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #333;
+            font-size: 13px;
+        }
+        input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 13px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .login-section {
+            text-align: center;
+            padding: 15px 0;
+        }
+        .hidden {
+            display: none;
+        }
+        .error {
+            color: #dc3545;
+            font-size: 11px;
+            margin-top: 4px;
+            padding: 4px;
+            background-color: #f8d7da;
+            border-radius: 3px;
+        }
+        .success {
+            color: #28a745;
+            font-size: 11px;
+            margin-top: 4px;
+            padding: 4px;
+            background-color: #d4edda;
+            border-radius: 3px;
+        }
+        .loading {
+            color: #6c757d;
+            text-align: center;
+            padding: 8px;
+            font-size: 13px;
+        }
+        .current-url {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            word-break: break-all;
+            border-left: 4px solid #007bff;
+        }
+        .bookmark-section {
+            text-align: center;
+        }
+        .url-display {
+            background: #e9ecef;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 11px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Section -->
+    <div id="loadingSection" class="loading">
+        <p>Checking authentication...</p>
+    </div>
+
+    <!-- Login Section -->
+    <div id="loginSection" class="login-section hidden">
+        <h3>Sign In Required</h3>
+        <p>To use DevMark you need to sign in</p>
+        <a href="https://dev-mark-g88i9l2mr-harolds-projects-a73372ca.vercel.app/auth/login" target="_blank">
+            <button style="background-color: #28a745; margin-bottom: 8px;">
+                Sign In to DevMark
+            </button>
+        </a>
+        <p><small>After signing in, reload this extension</small></p>
+        <button id="reloadExtension">I already signed in</button>
+    </div>
+
+    <!-- Bookmark Section - SIMPLIFIED -->
+    <div id="bookmarkSection" class="bookmark-section hidden">
+        <h3 style="text-align: center; margin-bottom: 15px; color: #333;">➕ Add to DevMark</h3>
+        
+        <div class="url-display">
+            <strong>Current Page:</strong><br>
+            <span id="currentUrl">Loading...</span>
+        </div>
+
+        <button id="createBookmark">✨ Add This Page to Bookmarks</button>
+        
+        <div id="message" class="hidden"></div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "DevMark",
+    "version": "1.0",
+    "description": "DevMark Extension - Save bookmarks easily",
+    "icons": {
+        "128": "icon.png"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "DevMark"
+    },
+    "permissions": [
+        "activeTab",
+        "storage",
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://dev-mark-g88i9l2mr-harolds-projects-a73372ca.vercel.app/*",
+        "https://fmkxhfxkxlktcdgziocg.supabase.co/*"
+    ]
+}
