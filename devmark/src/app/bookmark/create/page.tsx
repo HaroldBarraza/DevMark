@@ -1,19 +1,35 @@
 'use client';
 import { addBookmark } from '@/app/lib/bookmarkaction/actionbookamarlk';
 import { useUser } from '@/app/context/UserContext';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 /**
  * Page component for creating new bookmarks
  * Handles URL input and automatic metadata extraction
+ * Supports pre-filled URL from extension
  */
 export default function CreateBookmark() {
   const { userId } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [tagsInput, setTagsInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [prefilledUrl, setPrefilledUrl] = useState('');
+
+  /**
+   * Get URL from query parameters when component mounts
+   */
+  useEffect(() => {
+    const urlParam = searchParams.get('url');
+    if (urlParam) {
+      // Decode the URL parameter and set it
+      const decodedUrl = decodeURIComponent(urlParam);
+      setPrefilledUrl(decodedUrl);
+      console.log('🔗 Pre-filled URL from extension:', decodedUrl);
+    }
+  }, [searchParams]);
 
   /**
    * Handles bookmark creation form submission
@@ -60,8 +76,24 @@ export default function CreateBookmark() {
         
         {/* Header Section */}
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Create New Bookmark</h1>
-          <p className="text-gray-600">Enter a website URL to save as bookmark</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            {prefilledUrl ? 'Add Bookmark from Extension' : 'Create New Bookmark'}
+          </h1>
+          <p className="text-gray-600">
+            {prefilledUrl 
+              ? 'Review and save this page to your bookmarks' 
+              : 'Enter a website URL to save as bookmark'
+            }
+          </p>
+          
+          {/* Show extension indicator */}
+          {prefilledUrl && (
+            <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-700">
+                🚀 <strong>Extension Detected:</strong> URL pre-filled from your current page
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Bookmark Creation Form */}
@@ -78,8 +110,15 @@ export default function CreateBookmark() {
               name="link" 
               placeholder="https://example.com" 
               required 
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              value={prefilledUrl}
+              onChange={(e) => setPrefilledUrl(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-gray-50"
             />
+            {prefilledUrl && (
+              <p className="text-sm text-green-600 mt-2">
+                ✅ URL automatically filled from extension
+              </p>
+            )}
           </div>
 
           {/* Tags Input - Optional Field */}
@@ -112,7 +151,7 @@ export default function CreateBookmark() {
                 Creating Bookmark...
               </>
             ) : (
-              'Add Bookmark'
+              `Add Bookmark${prefilledUrl ? ' from Extension' : ''}`
             )}
           </button>
         </form>
@@ -126,6 +165,25 @@ export default function CreateBookmark() {
             ← Back to Bookmarks
           </Link>
         </div>
+
+        {/* Auto-submit experimental feature (optional) */}
+        {prefilledUrl && (
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                // Auto-fill and submit if user wants quick save
+                const form = document.querySelector('form');
+                if (form) {
+                  form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+              }}
+              className="text-sm text-gray-500 hover:text-gray-700 underline"
+            >
+              Quick Save (skip tags)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
