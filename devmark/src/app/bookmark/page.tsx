@@ -184,7 +184,7 @@ export default function BookmarksPage() {
           </div>
         ) : filteredBookmarks.length === 0 && searchQuery ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-2">No bookmarks found for "{searchQuery}"</p>
+            <p className="text-gray-500 text-lg mb-2">No bookmarks found for {searchQuery}</p>
             <p className="text-gray-400 text-sm">
               Try searching by title, description, URL, or tags
             </p>
