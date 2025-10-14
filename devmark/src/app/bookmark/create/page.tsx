@@ -2,15 +2,13 @@
 import { addBookmark } from '@/app/lib/bookmarkaction/actionbookamarlk';
 import { useUser } from '@/app/context/UserContext';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 
 /**
- * Page component for creating new bookmarks
- * Handles URL input and automatic metadata extraction
- * Supports pre-filled URL from extension
+ * Inner component that uses useSearchParams - wrapped in Suspense
  */
-export default function CreateBookmark() {
+function CreateBookmarkContent() {
   const { userId } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -165,26 +163,25 @@ export default function CreateBookmark() {
             ← Back to Bookmarks
           </Link>
         </div>
-
-        {/* Auto-submit experimental feature (optional) */}
-        {prefilledUrl && (
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                // Auto-fill and submit if user wants quick save
-                const form = document.querySelector('form');
-                if (form) {
-                  form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                }
-              }}
-              className="text-sm text-gray-500 hover:text-gray-700 underline"
-            >
-              Quick Save (skip tags)
-            </button>
-          </div>
-        )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Main page component with Suspense boundary
+ */
+export default function CreateBookmark() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading bookmark form...</p>
+        </div>
+      </div>
+    }>
+      <CreateBookmarkContent />
+    </Suspense>
   );
 }
